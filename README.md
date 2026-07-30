@@ -2,25 +2,24 @@
 
 Unified AI Org Hub + SimplyWise AI Receptionist (Diane) + Live Operations Dashboard
 
+**Live:** https://orgsuite-command-center.vercel.app  
 **Phone:** +1 512-562-4400
-
-## Live
-
-Deployed on Vercel.
 
 ## Features
 
-- SimplyWise AI Receptionist status (Diane)
+- Official Orgsuite branding with logo-inspired background
+- SimplyWise AI Receptionist (Diane) status
 - Live receptionist & AI logs feed
 - KPI cards (AI Syncs, Calls, Leads, Domain Health)
 - Quick links to Email Deliverability Suite
-- Ready for Firebase + WebSocket real-time connection
+- Clear next-steps panel for Firebase + WebSocket
 
-## Next Steps
+## Finish the Full System
 
-1. Connect Firebase Cloud Functions for real receptionist logs
-2. Deploy WebSocket server for live updates
-3. Wire marketing form submissions
+1. **Firebase Cloud Functions** — Deploy SimplyWise backend so real calls/texts appear
+2. **WebSocket Server** — Deploy to Railway / Render / Fly.io
+3. **Connect real-time logs** — Point this dashboard at Firestore + WebSocket
+4. **GitHub auto-deploy** — Vercel → Settings → Git → connect this repo
 
 ## Related
 
