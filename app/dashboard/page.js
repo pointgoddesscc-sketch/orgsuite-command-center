@@ -1,4 +1,5 @@
 import { auth, signOut } from "../../auth";
+import { redirect } from "next/navigation";
 import ExternalServicesStatus from "../../components/ExternalServicesStatus";
 import PromptCopy from "../../components/PromptCopy";
 
@@ -11,10 +12,12 @@ const shortcuts = [
 
 export default async function DashboardPage() {
   const session = await auth();
+  if (!session) redirect("/sign-in");
+
   return <main style={{minHeight:"100vh",background:"#0f172a",color:"#f8fafc",padding:"32px 20px"}}>
     <div style={{maxWidth:1000,margin:"0 auto"}}>
       <header style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:16,flexWrap:"wrap",marginBottom:28}}>
-        <div><div style={{fontSize:12,letterSpacing:2,color:"#94a3b8"}}>ORGSUITE</div><h1 style={{margin:"8px 0"}}>Command Center</h1><p style={{color:"#cbd5e1",margin:0}}>Signed in as {session?.user?.email || "Google user"}</p></div>
+        <div><div style={{fontSize:12,letterSpacing:2,color:"#94a3b8"}}>ORGSUITE</div><h1 style={{margin:"8px 0"}}>Command Center</h1><p style={{color:"#cbd5e1",margin:0}}>Signed in as {session.user?.email || "Google user"}</p></div>
         <form action={async()=>{"use server";await signOut({redirectTo:"/sign-in"});}}><button style={{padding:"10px 16px",borderRadius:9,border:"1px solid #475569",background:"transparent",color:"#f8fafc"}}>Sign out</button></form>
       </header>
       <ExternalServicesStatus />
