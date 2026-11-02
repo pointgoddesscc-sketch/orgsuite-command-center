@@ -2,7 +2,7 @@
 
 ## Verified status at implementation time
 
-The existing repository README mentions Railway, Render, and Fly.io as possible WebSocket hosting choices, but does not identify a selected host, service name, endpoint, or deployment URL. Those details remain **not verified**.
+The existing repository README mentions Railway, Render, and Fly.io as possible WebSocket hosting choices, but does not identify a selected host, service name, endpoint, or deployment URL. Those details remain **unverified**.
 
 ## WebSocket endpoint discovery
 
@@ -19,12 +19,12 @@ The existing repository README mentions Railway, Render, and Fly.io as possible 
 3. Configure `FIREBASE_HEALTHCHECK_URL` only after that endpoint is verified.
 4. The dashboard reports **Connected** only when the configured health endpoint responds successfully. No endpoint is assumed or fabricated.
 
-## Dashboard states
+## Dashboard status vocabulary
 
-- **Connected**: an actual service handshake or health request succeeded.
-- **Not configured**: no endpoint has been provided.
-- **Not connected**: a connection was previously open but has closed.
-- **Unavailable**: a configured endpoint could not be reached.
-- **Not available**: the service is deliberately link-only or has no supported integration in this project.
+- **Connected**: an actual service handshake or dedicated health request succeeded.
+- **Checking**: a real check is currently running.
+- **Not configured**: no endpoint or integration has been provided.
+- **Disconnected**: a configured connection or health request failed or closed.
+- **Unverified**: a check could not establish a reliable result.
 
-The dashboard placeholders do not create or deploy external infrastructure.
+Google Flow and Flow Music are shortcut links only; they are not connected services. The dashboard does not create or deploy external infrastructure.
