@@ -23,12 +23,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, account }) {
       if (account?.provider === "google") {
         const refreshToken = account.refresh_token ?? token.googleRefreshToken;
-        // A Gmail-enabled session must have an offline refresh token. Without
-        // one, do not issue or preserve an authenticated session.
-        if (!refreshToken) return null;
+        // A Gmail-enabled session must have an offline refresh token. Keep
+        // the JWT structurally valid, but mark it unusable if one is missing.
+        if (!refreshToken) {
+          delete token.googleAccessToken;
+          delete token.googleRefreshToken;
+          delete token.googleAccessTokenExpires;
+          token.googleAuthError = "MissingRefreshToken";
+          return token;
+        }
 
         token.googleAccessToken = account.access_token;
         token.googleRefreshToken = refreshToken;
+        delete token.googleAuthError;
         // Google account.expires_at is Unix seconds; JWT uses milliseconds.
         token.googleAccessTokenExpires = account.expires_at
           ? account.expires_at * 1000
@@ -36,10 +43,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.googleScope = account.scope ?? "";
       }
 
-      if (!token.googleRefreshToken) return null;
+      if (!token.googleRefreshToken) token.googleAuthError = "MissingRefreshToken";
       return token;
     },
-    async session({ session }) {
+    async session({ session, token }) {
+      // A tokenless Google JWT must not become an authenticated app session.
+      if (token.googleAuthError || !token.googleRefreshToken) return null;
       // Provider tokens deliberately remain out of the browser-visible session.
       return session;
     }
