@@ -1,24 +1,50 @@
-import { auth } from "../../../../auth";
 import { getGoogleAccessToken } from "../../../../lib/google-token";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request) {
-  const session = await auth();
-  if (!session) return Response.json({ status: "not_connected" }, { status: 401 });
+function jsonWithCookies(payload, status, cookies = []) {
+  const response = Response.json(payload, {
+    status,
+    headers: { "cache-control": "no-store" }
+  });
+  for (const cookie of cookies) response.headers.append("set-cookie", cookie);
+  return response;
+}
 
-  const accessToken = await getGoogleAccessToken(request);
+export async function GET(request) {
+  const { accessToken, setCookies } = await getGoogleAccessToken(request);
   if (!accessToken) {
-    return Response.json({ status: "reauthorization_required", detail: "No usable Gmail access token is available." });
+    return jsonWithCookies(
+      { status: "disconnected", detail: "A valid Google session and refresh token are required. Sign in again." },
+      401,
+      setCookies
+    );
   }
 
   const response = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/profile", {
     headers: { authorization: `Bearer ${accessToken}` },
     cache: "no-store"
   });
-  if (!response.ok) {
-    return Response.json({ status: "not_connected", detail: "Gmail API did not confirm access." });
+
+  if (response.status === 401) {
+    return jsonWithCookies(
+      { status: "disconnected", detail: "Google rejected the access token. Sign in again." },
+      401,
+      setCookies
+    );
   }
+  if (!response.ok) {
+    return jsonWithCookies(
+      { status: "disconnected", detail: `Gmail API returned HTTP ${response.status}.` },
+      502,
+      setCookies
+    );
+  }
+
   const profile = await response.json();
-  return Response.json({ status: "connected", emailAddress: profile.emailAddress, messagesTotal: profile.messagesTotal });
+  return jsonWithCookies(
+    { status: "connected", emailAddress: profile.emailAddress, messagesTotal: profile.messagesTotal },
+    200,
+    setCookies
+  );
 }
