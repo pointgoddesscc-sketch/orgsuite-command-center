@@ -22,11 +22,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, account }) {
       if (account?.provider === "google") {
+        const refreshToken = account.refresh_token ?? token.googleRefreshToken;
+        // A Gmail-enabled session must have an offline refresh token. Without
+        // one, do not issue or preserve an authenticated session.
+        if (!refreshToken) return null;
+
         token.googleAccessToken = account.access_token;
-        token.googleRefreshToken = account.refresh_token ?? token.googleRefreshToken;
-        token.googleAccessTokenExpires = account.expires_at ? account.expires_at * 1000 : null;
+        token.googleRefreshToken = refreshToken;
+        // Google account.expires_at is Unix seconds; JWT uses milliseconds.
+        token.googleAccessTokenExpires = account.expires_at
+          ? account.expires_at * 1000
+          : null;
         token.googleScope = account.scope ?? "";
       }
+
+      if (!token.googleRefreshToken) return null;
       return token;
     },
     async session({ session }) {
